@@ -1,51 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - KEYRADDIIN</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body class="dash-body">
+document.addEventListener("DOMContentLoaded", async () => {
+  const sidebarMenu = document.getElementById("sidebarMenu");
+  const userNameDisplay = document.getElementById("userNameDisplay");
+  const welcomeText = document.getElementById("welcomeText");
+  const roleText = document.getElementById("roleText");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const menuBtn = document.getElementById("menuBtn");
+  const sidebar = document.getElementById("sidebar");
+  const mainContentArea = document.getElementById("mainContentArea");
 
-  <!-- Header -->
-  <header class="dash-header">
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <button class="mobile-menu-btn" id="menuBtn">☰</button>
-      <h2>KEYRADDIIN</h2>
-    </div>
-    <div class="user-info">
-      <span id="userNameDisplay">Eegaa...</span>
-      <button id="logoutBtn" class="btn-logout">Ba'i (Logout)</button>
-    </div>
-  </header>
+  // Mobile Menu Toggle
+  menuBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("active");
+  });
 
-  <!-- Layout -->
-  <div class="dash-layout">
-    <!-- Sidebar -->
-    <aside class="dash-sidebar" id="sidebar">
-      <div id="sidebarMenu">
-        <!-- Menu JavaScript dhaan ni guutama -->
+  // 1. Mirkaneessuu Nama Seene (Session Check)
+  const { data: { session }, error: sessionError } = await window.KEYRA_DB.auth.getSession();
+  
+  if (sessionError || !session) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  // 2. Odeeffannoo Profile Fudhachuu
+  let { data: profile, error: profileError } = await window.KEYRA_DB
+    .from("profiles")
+    .select("*")
+    .eq("id", session.user.id)
+    .maybeSingle();
+
+  if (profileError || !profile) {
+    alert("Dogoggora: Odeeffannoo herrega keessan argachuu hin dandeenye.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  // 3. Maqaa fi Role Agarsiisuu
+  userNameDisplay.innerText = profile.full_name || profile.email;
+  welcomeText.innerText = `Baga nagaan dhuftan, ${profile.full_name || 'Barataa'}!`;
+  roleText.innerText = `Role: ${profile.role.toUpperCase()}`;
+
+  // 4. Menu fi Kaardiiwwan Uumuu (Role irratti hundaa'e)
+  const menus = {
+    admin: [
+      { name: "Barattoota", icon: "👨‍🎓", link: "#" },
+      { name: "Qormaata Uumuu", icon: "📝", link: "#" },
+      { name: "Qabxii Ilaaluu", icon: "🎯", link: "#" }
+    ],
+    student: [
+      { name: "Qormaata Hojjechuu", icon: "📝", link: "exam.html?code=G9-MATHS-U1-2019" },
+      { name: "Qabxii Koo", icon: "🎯", link: "#" },
+      { name: "Hojii Manaa", icon: "📚", link: "#" }
+    ]
+  };
+
+  const userMenus = menus[profile.role] || menus["student"];
+  
+  // Sidebar Menu Uumuu
+  sidebarMenu.innerHTML = "";
+  // Dashboard Kaardiiwwan Uumuu
+  mainContentArea.innerHTML = `<div class="dash-grid" id="cardGrid"></div>`;
+  const cardGrid = document.getElementById("cardGrid");
+
+  userMenus.forEach(menu => {
+    // Sidebar link
+    const a = document.createElement("a");
+    a.href = menu.link;
+    a.className = "sidebar-link";
+    a.innerHTML = `${menu.icon} ${menu.name}`;
+    sidebarMenu.appendChild(a);
+
+    // Dashboard Card
+    const card = document.createElement("div");
+    card.className = "dash-card";
+    card.innerHTML = `
+      <div>
+        <h3>${menu.icon} ${menu.name}</h3>
+        <p>Asitti cuqaasiitii hojii kana hojjedhu.</p>
       </div>
-    </aside>
+      <a href="${menu.link}" class="btn-primary btn-sm">Banuu</a>
+    `;
+    cardGrid.appendChild(card);
+  });
 
-    <!-- Main Content -->
-    <main class="dash-main">
-      <div class="welcome-box">
-        <h1 id="welcomeText">Baga nagaan dhuftan!</h1>
-        <p id="roleText">Role keessan: ...</p>
-      </div>
-
-      <div id="mainContentArea">
-        <!-- Content adda addaa asitti mul'ata -->
-        <p>Dashboard qophaa'aa jira...</p>
-      </div>
-    </main>
-  </div>
-
-  <!-- Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-client.js"></script>
-  <script src="js/dashboard.js"></script>
-</body>
-</html>
+  // 5. Logout
+  logoutBtn.addEventListener("click", async () => {
+    await window.KEYRA_DB.auth.signOut();
+    window.location.href = "login.html";
+  });
+});
