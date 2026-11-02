@@ -18,8 +18,8 @@
         <input type="text" id="fullName" required placeholder="Maqaa keessan guutuu">
       </div>
       <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" required placeholder="Email keessan">
+        <label for="studentId">Username / Student ID (Ofiin filadhu)</label>
+        <input type="text" id="studentId" required placeholder="Fkn: KEYRA-0001 (Yeroo booda seenuuf)">
       </div>
       <div class="form-group">
         <label for="grade">Kutaa (Grade)</label>
@@ -49,7 +49,6 @@
     </div>
   </div>
 
-  <!-- Supabase Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-client.js"></script>
   
@@ -65,15 +64,18 @@
       errorMsg.style.display = "none";
       successMsg.style.display = "none";
 
-      const email = document.getElementById("email").value;
+      const username = document.getElementById("studentId").value.trim();
       const password = document.getElementById("password").value;
       const fullName = document.getElementById("fullName").value;
       const grade = parseInt(document.getElementById("grade").value);
       const school = document.getElementById("school").value;
 
+      // FAKE EMAIL UUMUU
+      const emailToUse = username + "@keyra.local";
+
       // 1. Uumuu Auth User
       const { data: authData, error: authError } = await window.KEYRA_DB.auth.signUp({
-        email: email,
+        email: emailToUse,
         password: password,
         options: { data: { full_name: fullName } }
       });
@@ -88,26 +90,29 @@
 
       // 2. Galmeessuu Barataa (Students table)
       if (authData.user) {
-        // Student ID ofumaan uumuu
-        const { data: idData, error: idError } = await window.KEYRA_DB.rpc("generate_student_id");
-        
-        if (!idError) {
-          await window.KEYRA_DB.from("students").insert({
-            profile_id: authData.user.id,
-            student_id: idData,
-            grade: grade,
-            school_name: school,
-            status: "active"
-          });
+        const { error: studentError } = await window.KEYRA_DB.from("students").insert({
+          profile_id: authData.user.id,
+          student_id: username, 
+          grade: grade,
+          school_name: school,
+          status: "active"
+        });
+
+        if (studentError) {
+           errorMsg.innerText = "Auth uumame garuu students table dogoggora: " + studentError.message;
+           errorMsg.style.display = "block";
+           btn.innerText = "Galmaa'i";
+           btn.disabled = false;
+           return;
         }
 
-        successMsg.innerText = "Milkaa'inaan galmaa'teetta! Gara fuula seenaatti ce'aa.";
+        successMsg.innerText = "Milkaa'inaan galmaa'teetta! Username keessaniin seenuu dandeessu.";
         successMsg.style.display = "block";
         btn.innerText = "Xumurameera";
         
         setTimeout(() => {
           window.location.href = "login.html";
-        }, 2000);
+        }, 2500);
       }
     });
   </script>

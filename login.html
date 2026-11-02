@@ -14,8 +14,8 @@
 
     <form id="loginForm">
       <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" required placeholder="Email keessan galchaa">
+        <label for="username">Username / Student ID</label>
+        <input type="text" id="username" required placeholder="Fkn: KEYRA-0001 yookaan email keessan">
       </div>
       <div class="form-group">
         <label for="password">Jecha Darbii (Password)</label>
@@ -32,7 +32,6 @@
     </div>
   </div>
 
-  <!-- Supabase Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-client.js"></script>
   
@@ -46,22 +45,24 @@
       btn.disabled = true;
       errorMsg.style.display = "none";
 
-      const email = document.getElementById("email").value;
+      let inputVal = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value;
 
-      // Seensa Supabase
+      // FAKE EMAIL LOGIC
+      // Yoo '@' of keessatti hin qabu (fkn: KEYRA-0001), '@keyra.local' itti dabali
+      let emailToUse = inputVal.includes('@') ? inputVal : inputVal + "@keyra.local";
+
       const { data, error } = await window.KEYRA_DB.auth.signInWithPassword({
-        email: email,
+        email: emailToUse,
         password: password
       });
 
       if (error) {
-        errorMsg.innerText = "Dogoggora: " + error.message;
+        errorMsg.innerText = "Dogoggora: Username yookaan Jecha darbii sirrii miti.";
         errorMsg.style.display = "block";
         btn.innerText = "Seeni";
         btn.disabled = false;
       } else {
-        // Yoo milkaa'e gara dashboard darbi
         window.location.href = "dashboard.html";
       }
     });
