@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - KEYRADDIIN</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-body">
+
+  <div class="auth-card">
+    <h2>Seeni (Login)</h2>
+    <p class="subtitle">Baga nagaan deebite! Itti fufuuf seeni.</p>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" required placeholder="Email keessan galchaa">
+      </div>
+      <div class="form-group">
+        <label for="password">Jecha Darbii (Password)</label>
+        <input type="password" id="password" required placeholder="********">
+      </div>
+      
+      <button type="submit" class="btn-primary btn-block" id="loginBtn">Seeni</button>
+      <div id="errorMsg" class="error-msg"></div>
+    </form>
+
+    <div class="auth-links">
+      Herrega hin qabduu? <a href="register.html">Asitti Galmaa'i</a><br><br>
+      <a href="index.html" style="color: #5b6780; font-weight: normal;">&larr; Gara Fuula Duraa</a>
+    </div>
+  </div>
+
+  <!-- Supabase Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById("loginBtn");
+      const errorMsg = document.getElementById("errorMsg");
+      
+      btn.innerText = "Eegaa...";
+      btn.disabled = true;
+      errorMsg.style.display = "none";
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      // Seensa Supabase
+      const { data, error } = await window.KEYRA_DB.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      if (error) {
+        errorMsg.innerText = "Dogoggora: " + error.message;
+        errorMsg.style.display = "block";
+        btn.innerText = "Seeni";
+        btn.disabled = false;
+      } else {
+        // Yoo milkaa'e gara dashboard darbi
+        window.location.href = "dashboard.html";
+      }
+    });
+  </script>
+</body>
+</html>

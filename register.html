@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - KEYRADDIIN</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-body">
+
+  <div class="auth-card">
+    <h2>Galmaa'i (Register)</h2>
+    <p class="subtitle">Barataa haaraa ta'uuf unka guutaa.</p>
+
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="fullName">Maqaa Guutuu</label>
+        <input type="text" id="fullName" required placeholder="Maqaa keessan guutuu">
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" required placeholder="Email keessan">
+      </div>
+      <div class="form-group">
+        <label for="grade">Kutaa (Grade)</label>
+        <select id="grade" required>
+          <option value="">Filadhu...</option>
+          <option value="9">Grade 9</option>
+          <option value="10">Grade 10</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="school">Maqaa Mana Barnootaa</label>
+        <input type="text" id="school" required placeholder="Mana barnootaa keessan">
+      </div>
+      <div class="form-group">
+        <label for="password">Jecha Darbii (Password)</label>
+        <input type="password" id="password" required minlength="6" placeholder="Min 6 qubee">
+      </div>
+      
+      <button type="submit" class="btn-primary btn-block" id="regBtn">Galmaa'i</button>
+      <div id="errorMsg" class="error-msg"></div>
+      <div id="successMsg" class="success-msg"></div>
+    </form>
+
+    <div class="auth-links">
+      Duraan galmaa'teettaa? <a href="login.html">Seeni</a><br><br>
+      <a href="index.html" style="color: #5b6780; font-weight: normal;">&larr; Gara Fuula Duraa</a>
+    </div>
+  </div>
+
+  <!-- Supabase Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById("regBtn");
+      const errorMsg = document.getElementById("errorMsg");
+      const successMsg = document.getElementById("successMsg");
+      
+      btn.innerText = "Galmeessaa jira...";
+      btn.disabled = true;
+      errorMsg.style.display = "none";
+      successMsg.style.display = "none";
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const fullName = document.getElementById("fullName").value;
+      const grade = parseInt(document.getElementById("grade").value);
+      const school = document.getElementById("school").value;
+
+      // 1. Uumuu Auth User
+      const { data: authData, error: authError } = await window.KEYRA_DB.auth.signUp({
+        email: email,
+        password: password,
+        options: { data: { full_name: fullName } }
+      });
+
+      if (authError) {
+        errorMsg.innerText = "Dogoggora: " + authError.message;
+        errorMsg.style.display = "block";
+        btn.innerText = "Galmaa'i";
+        btn.disabled = false;
+        return;
+      }
+
+      // 2. Galmeessuu Barataa (Students table)
+      if (authData.user) {
+        // Student ID ofumaan uumuu
+        const { data: idData, error: idError } = await window.KEYRA_DB.rpc("generate_student_id");
+        
+        if (!idError) {
+          await window.KEYRA_DB.from("students").insert({
+            profile_id: authData.user.id,
+            student_id: idData,
+            grade: grade,
+            school_name: school,
+            status: "active"
+          });
+        }
+
+        successMsg.innerText = "Milkaa'inaan galmaa'teetta! Gara fuula seenaatti ce'aa.";
+        successMsg.style.display = "block";
+        btn.innerText = "Xumurameera";
+        
+        setTimeout(() => {
+          window.location.href = "login.html";
+        }, 2000);
+      }
+    });
+  </script>
+</body>
+</html>

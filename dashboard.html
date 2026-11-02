@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - KEYRADDIIN</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dash-body">
+
+  <!-- Header -->
+  <header class="dash-header">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button class="mobile-menu-btn" id="menuBtn">☰</button>
+      <h2>KEYRADDIIN</h2>
+    </div>
+    <div class="user-info">
+      <span id="userNameDisplay">Eegaa...</span>
+      <button id="logoutBtn" class="btn-logout">Ba'i (Logout)</button>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="dash-layout">
+    <!-- Sidebar -->
+    <aside class="dash-sidebar" id="sidebar">
+      <div id="sidebarMenu">
+        <!-- Menu JavaScript dhaan ni guutama -->
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dash-main">
+      <div class="welcome-box">
+        <h1 id="welcomeText">Baga nagaan dhuftan!</h1>
+        <p id="roleText">Role keessan: ...</p>
+      </div>
+
+      <div id="mainContentArea">
+        <!-- Content adda addaa asitti mul'ata -->
+        <p>Dashboard qophaa'aa jira...</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
